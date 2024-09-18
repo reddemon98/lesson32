@@ -1,0 +1,55 @@
+node {
+ // Конфигурации
+ def gitRepo = 'https://github.com/reddemon98/lesson32.git' // URL Git репозитория
+ def dockerImageName = 'leksandr_test_pipeline' // Имя Docker-образа
+ def dockerImageTag = 'latest' // Тег Docker-образа
+ def containerName = 'myapp-docker' // Имя Docker-контейнера
+ def httpPort = 8080 // Порт
+ try {
+ stage('Clone Repository') {
+ echo 'Клонирование репозитория...'
+ git branch: 'main', url: gitRepo
+ }
+//stage('Install Docker') {
+//    echo 'Create Docker image...'
+//    sh "dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo"
+//      sh "dnf install docker-ce docker-ce-cli containerd.io"
+//}
+//stage('Build Docker Image') {
+// echo 'Создание Docker-образа...'
+  //Предполагается, что в директории есть Dockerfile
+// sh "podman build -t leksandr/${dockerImageName}:${dockerImageTag} ."
+// }
+
+ stage('Run Docker Container') {
+ echo 'Запуск Docker-контейнера...'
+ sh "b"
+ }
+ stage('Check Application Availability') {
+ echo 'Проверка доступности веб-приложения...'
+ def response = sh(script: "curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8080", 
+returnStdout: true).trim()
+ if (response != '200') {
+ error("Deployment failed: HTTP response code is ${response}")
+ }
+ echo 'Веб-приложение доступно!'
+ }
+ stage('Push Docker Image to Docker Hub') {
+ echo 'Пушим Docker-образ в Docker Hub...'
+ withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', passwordVariable: 
+'DOCKER_PWD', usernameVariable: 'DOCKER_USR')]) {
+ sh "echo ${DOCKER_PWD} | docker login -u ${DOCKER_USR} --password-stdin"
+ sh "docker push ${DOCKER_USR}/${dockerImageName}:${dockerImageTag}"
+ }
+ }
+ } catch (Exception e) {
+ echo "Произошла ошибка: ${e.message}"
+ error("Pipeline failed.")
+ } finally {
+ stage('Cleanup') {
+ echo 'Очистка ресурсов...'
+ sh "docker stop ${containerName}  true"
+ sh "docker rm ${containerName}  true"
+ }
+ }
+}
