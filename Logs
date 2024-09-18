@@ -1,0 +1,122 @@
+Started by user Leksandr
+[Pipeline] Start of Pipeline
+[Pipeline] node
+Running on Jenkins in /var/lib/jenkins/workspace/pipeline
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Clone Repository)
+[Pipeline] echo
+Клонирование репозитория...
+[Pipeline] git
+The recommended git tool is: NONE
+No credentials specified
+ > git rev-parse --resolve-git-dir /var/lib/jenkins/workspace/pipeline/.git # timeout=10
+Fetching changes from the remote Git repository
+ > git config remote.origin.url https://github.com/reddemon98/lesson32.git # timeout=10
+Fetching upstream changes from https://github.com/reddemon98/lesson32.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.46.0'
+ > git fetch --tags --force --progress -- https://github.com/reddemon98/lesson32.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git rev-parse refs/remotes/origin/main^{commit} # timeout=10
+Checking out Revision 7150220a6c3c8907aaf967b01c69367c7388181a (refs/remotes/origin/main)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 7150220a6c3c8907aaf967b01c69367c7388181a # timeout=10
+ > git branch -a -v --no-abbrev # timeout=10
+ > git branch -D main # timeout=10
+ > git checkout -b main 7150220a6c3c8907aaf967b01c69367c7388181a # timeout=10
+Commit message: "Update Dockerfile"
+ > git rev-list --no-walk 7150220a6c3c8907aaf967b01c69367c7388181a # timeout=10
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Run Docker Container)
+[Pipeline] echo
+Запуск Docker-контейнера...
+[Pipeline] sh
++ docker run -d --name myapp-docker -p 8088:8088 leksandr_test_pipeline:latest
+6fd106118b40affce77ab2c43290a56ecdaf7217b12d09cf757f0b408a55e513
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Check Application Availability)
+[Pipeline] echo
+Проверка доступности веб-приложения...
+[Pipeline] sh
++ curl -s -o /dev/null -w %{http_code} -u Leksandr:ff8cbf1317f74f9cabe6033c22761c5b http://localhost:8080
+[Pipeline] echo
+Веб-приложение доступно!
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Push Docker Image to Docker Hub)
+[Pipeline] echo
+Пуш Docker-образа в Docker Hub...
+[Pipeline] withCredentials
+Masking supported pattern matches of $DOCKER_PASSWORD
+[Pipeline] {
+[Pipeline] sh
+Warning: A secret was passed to "sh" using Groovy String interpolation, which is insecure.
+		 Affected argument(s) used the following variable(s): [DOCKER_PASSWORD]
+		 See https://jenkins.io/redirect/groovy-string-interpolation for details.
++ echo ****
++ docker login -u llleks --password-stdin
+WARNING! Your password will be stored unencrypted in /var/lib/jenkins/.docker/config.json.
+Configure a credential helper to remove this warning. See
+https://docs.docker.com/engine/reference/commandline/login/#credential-stores
+
+Login Succeeded
+[Pipeline] sh
++ docker push llleks/leksandr_test_pipeline:latest
+The push refers to repository [docker.io/llleks/leksandr_test_pipeline]
+e75e201d5a74: Preparing
+ebd68ab4b308: Preparing
+83fa56e90990: Preparing
+d173956b8424: Preparing
+f77a3bb0d661: Preparing
+287b1f302ec2: Preparing
+64f01445c2c4: Preparing
+8f5ebd7199cb: Preparing
+28e03088bc15: Preparing
+0d80db6a0977: Preparing
+916d866d5b0d: Preparing
+8f4ceb8cc1a2: Preparing
+287b1f302ec2: Waiting
+64f01445c2c4: Waiting
+0d80db6a0977: Waiting
+8f5ebd7199cb: Waiting
+28e03088bc15: Waiting
+916d866d5b0d: Waiting
+8f4ceb8cc1a2: Waiting
+83fa56e90990: Layer already exists
+d173956b8424: Layer already exists
+f77a3bb0d661: Layer already exists
+e75e201d5a74: Layer already exists
+ebd68ab4b308: Layer already exists
+8f5ebd7199cb: Layer already exists
+287b1f302ec2: Layer already exists
+28e03088bc15: Layer already exists
+64f01445c2c4: Layer already exists
+0d80db6a0977: Layer already exists
+916d866d5b0d: Layer already exists
+8f4ceb8cc1a2: Layer already exists
+latest: digest: sha256:f2061000769f73fe80a506f5e727eb1ff73d7fea151fda79ad022f876aa03ac3 size: 2840
+[Pipeline] }
+[Pipeline] // withCredentials
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Cleanup)
+[Pipeline] echo
+Очистка ресурсов...
+[Pipeline] sh
++ docker stop myapp-docker
+myapp-docker
+[Pipeline] sh
++ docker rm myapp-docker
+myapp-docker
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+Finished: SUCCESS
