@@ -13,5 +13,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Скопируйте весь проект
 COPY . .
 
+EXPOSE 8080
 # Задайте команду для запуска приложения
 CMD ["python", "bot.py"]
